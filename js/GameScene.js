@@ -5,13 +5,19 @@ class GameScene extends Phaser.Scene {
 
     // download background
     preload () {
-        this.load. image('bg', 'assets/sprites/background.png');
-        this.load. image('card', 'assets/sprites/card.png');
-        this.load. image('card1', 'assets/sprites/card1.png');
-        this.load. image('card2', 'assets/sprites/card2.png');
-        this.load. image('card3', 'assets/sprites/card3.png');
-        this.load. image('card4', 'assets/sprites/card4.png');
-        this.load. image('card5', 'assets/sprites/card5.png');
+        this.load.image('bg', 'assets/sprites/background.png');
+        this.load.image('card', 'assets/sprites/card.png');
+        this.load.image('card1', 'assets/sprites/card1.png');
+        this.load.image('card2', 'assets/sprites/card2.png');
+        this.load.image('card3', 'assets/sprites/card3.png');
+        this.load.image('card4', 'assets/sprites/card4.png');
+        this.load.image('card5', 'assets/sprites/card5.png');
+
+        this.load.audio('card', 'assets/sounds/card.mp3');
+        this.load.audio('theme', 'assets/sounds/theme.mp3');
+        this.load.audio('success', 'assets/sounds/success.mp3');
+        this.load.audio('timeout', 'assets/sounds/timeout.mp3');
+        this.load.audio('complete', 'assets/sounds/complete.mp3');
     };
 
     createText () {
@@ -23,6 +29,7 @@ class GameScene extends Phaser.Scene {
 
     onTimerTick () {
        if(this.timeout <= 0){
+            this.sounds.timeout.play();
             this.start();        
        } else {
             this.timeoutText.setText(`Time: ${--this.timeout}`);
@@ -38,9 +45,21 @@ class GameScene extends Phaser.Scene {
          });
     }
 
+    createSounds () {
+        this.sounds = {
+            card: this.sound.add('card'),
+            theme: this.sound.add('theme'),
+            success: this.sound.add('success'),
+            timeout: this.sound.add('timeout'),
+            complete: this.sound.add('complete')
+        };
+        this.sounds.theme.play({volume: 0.1});
+    }
+
     // render background
     create () {
         this.timeout = config.timeout;
+        this.createSounds();
         this.createTimer();
         this.createBackground();
         this.createText();
@@ -85,9 +104,12 @@ class GameScene extends Phaser.Scene {
     onCardClicked (pointer, card) {
         
         if(card.opened) return false;
+        this.sounds.card.play();
 
         if(this.openedCard) {
             if( this.openedCard.value === card.value) {
+                this.sounds.success.play();
+
                 this.openedCard = null;
                 this.openedCardsCount += 1;
             } else {
@@ -100,6 +122,7 @@ class GameScene extends Phaser.Scene {
 
         card.open();
         if(this.openedCardsCount === this.cards.length / 2) {
+            this.sounds.complete.play();
             this. start();
         }
     }
